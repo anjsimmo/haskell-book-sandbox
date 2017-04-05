@@ -91,11 +91,35 @@ def find_leftmost_beta_redex(ex):
 def beta_reduce_step(ex):
     match = find_leftmost_beta_redex(ex)
     if match is None:
-        print ("Done!")
-        return
+        return # done!
     start, head_open, param, separator, body, body_close, arg, end = match
     # apply body to arg
     consumed = apply(body, param, arg)
     ex = start + consumed + end
     return ex
+
+def beta_reduce_all(ex):
+   lim = 20
+   seen = []
+   step = 0
+   while True:
+        print ("step {}: {}".format(step, ex))
+        ex = beta_reduce_step(ex)
+        if ex == None:
+            print("beta normal form reached")
+            break
+        step += 1
+        if ex in seen:
+            print("divergence detected")
+            break
+        if step > lim:
+            print("failed to terminate within {} steps".format(step))
+            break
+        seen.append(ex)
+   print('') #newline
+
+
+
+
+
 

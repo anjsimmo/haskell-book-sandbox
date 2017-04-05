@@ -19,9 +19,9 @@ def match_beta_redex(ex, i=0):
     
     param = ""
     while True:
-        char = ex[i]
         # if ex starts with a lambda, then it should have an end
-        assert char is not None
+        assert not i >= len(ex)
+        char = ex[i]
         # the head should just contain a single variable
         assert char not in "()" + LAM, "{} {}".format(i, char)
         if char == ".":
@@ -35,7 +35,8 @@ def match_beta_redex(ex, i=0):
 
     body = ""
     while True:
-        # if ex starts with a lambda, then it should have an end
+        # if ex has a body, then it should have an end
+        assert not i >= len(ex)
         char = ex[i]
         if char == "(":
             paren_depth += 1
@@ -53,6 +54,11 @@ def match_beta_redex(ex, i=0):
 
     arg = ""
     while True:
+        # its possible that the ex ends without any args
+        if i >= len(ex):
+            # there is no excuse for the brackets not being balanced
+            assert paren_depth == 0
+            return None
         char = ex[i]
         if char == "(":
             paren_depth += 1
@@ -64,6 +70,9 @@ def match_beta_redex(ex, i=0):
 
         if paren_depth == 0:
             break
+        if paren_depth < 0:
+            # it's possible that the lambda is nested without any args
+            return None
 
     end = ex[i:]
 
@@ -83,8 +92,7 @@ def apply(ex, param, val):
 
 def find_leftmost_beta_redex(ex):
     for i in range(len(ex)):
-        _ex = ex[i:] 
-        match = match_beta_redex(_ex)
+        match = match_beta_redex(ex, i)
         if match:
             return match
 
@@ -95,6 +103,7 @@ def beta_reduce_step(ex):
     start, head_open, param, separator, body, body_close, arg, end = match
     # apply body to arg
     consumed = apply(body, param, arg)
+    print ('beta:   {}([{} := {}]{}){}'.format(start, param, arg, body, end))
     ex = start + consumed + end
     return ex
 
@@ -117,9 +126,6 @@ def beta_reduce_all(ex):
             break
         seen.append(ex)
    print('') #newline
-
-
-
 
 
 

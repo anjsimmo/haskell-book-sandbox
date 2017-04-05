@@ -12,3 +12,11 @@ beta_reduce_all(ex)
 ex = "(\\x.(\\y.(\\z.z)x))a"
 beta_reduce_all(ex)
 
+# WRONG!
+ex = "(\\x.(\\y.xy))(\\x.(\\y.x))"
+beta_reduce_all(ex)
+
+ex = "(\\x.xx)(\\x.xx)"
+beta_reduce_all(ex)
+
+

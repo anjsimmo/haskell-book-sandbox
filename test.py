@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from b2 import *
+from beta import beta_reduce
 
 # 1.11 Chapter Exercises
 
@@ -29,9 +29,9 @@ def do_exercises(exersise_text):
       print('Q{}:'.format(i+1))
       beta_reduce(line)
 
-print('1.11 - "Normal Form or diverge?" exercies\n')
+print('1.11 - "Normal Form or diverge?" exercises\n')
 do_exercises(exercises_b)
 
-print('1.11 - "Beta Reduce" exercies\n')
+print('1.11 - "Beta Reduce" exercises\n')
 do_exercises(exercises_c)
 

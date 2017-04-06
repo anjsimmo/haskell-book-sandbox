@@ -154,25 +154,29 @@ def extract_vars(ex):
     """return set of all var names appearing anywhere within ex"""
     return set(ex) & set(string.ascii_lowercase)
 
-def beta_reduce(ex):
-   lim = 20
+def beta_reduce(ex, lim=20):
    seen = []
    step = 0
+   solved = False
    while True:
         print ("step {}: {}".format(step, ex))
-        ex = reduce_step(ex)
-        if ex == None:
+        _ex = reduce_step(ex)
+        if _ex == None:
             print("beta normal form reached")
+            solved = True
             break
         step += 1
-        if ex in seen:
+        if _ex in seen:
             print("divergence detected")
             break
         if step > lim:
             print("failed to terminate within {} steps".format(step))
             break
-        seen.append(ex)
+        seen.append(_ex)
+        ex = _ex
    print('') #newline
-
-
+   if solved:
+       return ex
+   else:
+       return None
 

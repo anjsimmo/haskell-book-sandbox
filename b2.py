@@ -107,18 +107,35 @@ def gen_new_vars(var_names, banned):
     new_names = sorted(allowed)[:len(var_names)]
     return new_names
 
+def extract_params(ex):
+    """
+    Returns list of var names that are parameters within head of any lambda expression
+    """
+    bound_vars = set()
+    in_head = False
+    for char in ex:
+        if char == LAM:
+            in_head = True
+        elif char == ".":
+            in_head = False
+        if in_head:
+            if char in string.ascii_lowercase:
+                bound_vars.add(char)
+    return bound_vars
+
 def reduce_step(ex):
     match = find_leftmost_beta_redex(ex)
     if match is None:
         return # done!
     start, head_open, param, separator, body, body_close, arg, end = match
     lam_term = head_open + param + separator + body + body_close
-    # for safety, make sure arg variables do not appear in body
-    arg_vars = extract_vars(arg)
-    lam_vars = extract_vars(lam_term)
-    conflicts = sorted(arg_vars & lam_vars)
+    # free vars are not in conflict, because lam_term and arg share the same binding for free vars
+    arg_params = extract_params(arg)
+    lam_params = extract_params(lam_term)
+    used_vars  = extract_vars(arg) | extract_vars(lam_params) # avoid any var in use, whether free or param
+    conflicts = sorted(arg_params & lam_params)
     if conflicts:
-        new_vars = gen_new_vars(conflicts, arg_vars and lam_vars)
+        new_vars = gen_new_vars(conflicts, used_vars)
         renames = list(zip(conflicts, new_vars))
         rename_str = ', '.join(['{}<->{}'.format(r[0], r[1]) for r in renames])
         print ('alpha:  {}([{}]\\{}){}'.format(start, rename_str, param + separator + body, arg + end))

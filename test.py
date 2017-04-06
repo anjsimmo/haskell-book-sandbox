@@ -11,14 +11,16 @@ exercises_b = r"""
 """
 
 # Beta Reduce
+# example 6 modified so that first term doesn't shadow free var
+# example 7 modified so that first term doesn't shadow free var
 exercises_c = r"""
 (\a.(\b.(\c.cba)))zz(\w.(\v.w))
 (\x.(\y.xyy))(\a.a)b
 (\y.y)(\x.xx)(\z.zq)
-(\z.z)(\z.z)(z.zy)
+(\z.z)(\z.zz)(\z.zy)
 (\x.(\y.xyy))(\y.y)y
-(\a.aa)(\b.ba)c
-(\x.(\y.(\z.(yz))))(\x.z)(\x.a)
+(\m.mm)(\b.ba)c
+(\x.(\y.(\m.xm(ym))))(\x.z)(\x.a)
 """
 
 def do_exercises(exersise_text):
@@ -30,7 +32,6 @@ def do_exercises(exersise_text):
 print('1.11 - "Normal Form or diverge?" exercies\n')
 do_exercises(exercises_b)
 
-# gets beta reduction, exercise 3 onward wrong (renames a free var)
 print('1.11 - "Beta Reduce" exercies\n')
 do_exercises(exercises_c)
 

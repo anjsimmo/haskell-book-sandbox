@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import string
 
 LAM = "\\" # lambda represented with single back slash
 
@@ -50,7 +51,7 @@ def match_beta_redex(ex, i=0):
         i += 1
 
     body_close = ")"
-    i += 1    
+    i += 1
 
     arg = ""
     while True:
@@ -78,7 +79,10 @@ def match_beta_redex(ex, i=0):
 
     return start, head_open, param, separator, body, body_close, arg, end
 
-def alpha_equiv(ex, oldvar, newvar):
+def alpha_equiv(ex, oldvar, newvar, two_way=True):
+    if not two_way:
+       assert not newvar in ex
+    
     # swap oldvar and newvar
     tmp = "T"
     ex = ex.replace(newvar, tmp)
@@ -96,16 +100,42 @@ def find_leftmost_beta_redex(ex):
         if match:
             return match
 
-def beta_reduce_step(ex):
+def gen_new_vars(var_names, banned):
+    allowed = set(string.ascii_lowercase) - set(banned) - set(var_names)
+    if len(allowed) < len(var_names):
+        raise Exception("Ran out of alphabetic variable names!")
+    new_names = sorted(allowed)[:len(var_names)]
+    return new_names
+
+def reduce_step(ex):
     match = find_leftmost_beta_redex(ex)
     if match is None:
         return # done!
     start, head_open, param, separator, body, body_close, arg, end = match
-    # apply body to arg
-    consumed = apply(body, param, arg)
-    print ('beta:   {}([{} := {}]{}){}'.format(start, param, arg, body, end))
-    ex = start + consumed + end
-    return ex
+    lam_term = head_open + param + separator + body + body_close
+    # for safety, make sure arg variables do not appear in body
+    arg_vars = extract_vars(arg)
+    lam_vars = extract_vars(lam_term)
+    conflicts = sorted(arg_vars & lam_vars)
+    if conflicts:
+        new_vars = gen_new_vars(conflicts, arg_vars and lam_vars)
+        renames = list(zip(conflicts, new_vars))
+        rename_str = ', '.join(['{}<->{}'.format(r[0], r[1]) for r in renames])
+        print ('alpha:  {}([{}]\\{}){}'.format(start, rename_str, param + separator + body, arg + end))
+        for old, new in renames:
+            lam_term = alpha_equiv(lam_term, old, new, two_way=False)
+        ex = start + lam_term + arg + end
+        return ex
+    else:
+        # apply body to arg
+        consumed = apply(body, param, arg)
+        print ('beta:   {}([{} := {}]{}){}'.format(start, param, arg, body, end))
+        ex = start + consumed + end
+        return ex
+
+def extract_vars(ex):
+    """return set of all var names appearing anywhere within ex"""
+    return set(ex) & set(string.ascii_lowercase)
 
 def beta_reduce_all(ex):
    lim = 20
@@ -113,7 +143,7 @@ def beta_reduce_all(ex):
    step = 0
    while True:
         print ("step {}: {}".format(step, ex))
-        ex = beta_reduce_step(ex)
+        ex = reduce_step(ex)
         if ex == None:
             print("beta normal form reached")
             break

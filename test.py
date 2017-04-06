@@ -12,7 +12,7 @@ beta_reduce_all(ex)
 ex = "(\\x.(\\y.(\\z.z)x))a"
 beta_reduce_all(ex)
 
-# WRONG!
+# Requires alpha equivlance to solve without binding conflicts
 ex = "(\\x.(\\y.xy))(\\x.(\\y.x))"
 beta_reduce_all(ex)
 

@@ -137,7 +137,7 @@ def extract_vars(ex):
     """return set of all var names appearing anywhere within ex"""
     return set(ex) & set(string.ascii_lowercase)
 
-def beta_reduce_all(ex):
+def beta_reduce(ex):
    lim = 20
    seen = []
    step = 0

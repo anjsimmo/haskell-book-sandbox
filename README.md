@@ -1,1 +1,1 @@
-Miscellaneous code and notes while learning functional programming from the [Haskell Book](http://haskellbook.com/).
+Miscellaneous code and notes while learning functional programming from the [Haskell Book](http://haskellbook.com/), and [CIS 194: Introduction to Haskell](https://www.seas.upenn.edu/~cis194/spring13/).

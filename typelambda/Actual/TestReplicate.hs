@@ -5,7 +5,7 @@ import Data.Typeable
 import Expected.TestReplicate as E
 import System.IO
 
-x :: [(L(V(X,X))((V(X,X)),(V(X,X))),(L(V((),()))(L(V(X,X,X))(L(V(X,()))(Iff,(Cons,(V(X,())),((V((),())),(V((),())),(Minus,(V(X,X,X)),Integer),(V(X,())))),(),((L(V(X,()))(L(V((),X))(Iff,Integer,Int,(Minus,(V(X,())),(V((),X)))))),(V(X,X,X)),Int))))))]
+x :: [((L(V(X,X))((L(V(X,()))((V(X,X)),((V(X,())),(V(X,()))))),(L(V(X,()))((V(X,X)),((V(X,())),(V(X,()))))))),(L(V((),()))(L(V(X,X,X))(L(V(X,()))(Iff,(Cons,(V(X,())),((V((),())),(Minus,(V(X,X,X)),Integer),(V(X,())))),(),((L(V(X,()))(L(V((),X))(Iff,Integer,Int,(Minus,(V(X,())),(V((),X)))))),(V(X,X,X)),Int))))))]
 x = []
 
 lam :: Result

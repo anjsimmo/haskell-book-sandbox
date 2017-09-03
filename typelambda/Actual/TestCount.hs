@@ -5,7 +5,7 @@ import Data.Typeable
 import Expected.TestCount as E
 import System.IO
 
-x :: [(L(V(X,X))((V(X,X)),(V(X,X))),(L(V((),()))(L(V((X,X),()))(L(V(X,X,X))(Iff,Int,(Plus,(Iff,Int,Integer,((L(V(X,()))(L(V((),X))(Iff,Integer,Int,(Minus,(V(X,())),(V((),X)))))),(Car,(V((X,X),()))),(V(X,X,X)))),((V((),())),(V((),())),(Cdr,(V((X,X),()))),(V(X,X,X)))),((L(V(X,()))(Iff,Int,Integer,(V(X,())))),(V((X,X),()))))))))]
+x :: [((L(V(X,X))((L(V(X,()))((V(X,X)),((V(X,())),(V(X,()))))),(L(V(X,()))((V(X,X)),((V(X,())),(V(X,()))))))),(L(V((),()))(L(V((X,X),()))(L(V(X,X,X))(Iff,Int,(Plus,(Iff,Int,Integer,((L(V(X,()))(L(V((),X))(Iff,Integer,Int,(Minus,(V(X,())),(V((),X)))))),(Car,(V((X,X),()))),(V(X,X,X)))),((V((),())),(Cdr,(V((X,X),()))),(V(X,X,X)))),((L(V(X,()))(Iff,Int,Integer,(V(X,())))),(V((X,X),()))))))))]
 x = []
 
 lam :: Result

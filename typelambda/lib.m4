@@ -35,7 +35,9 @@ define(`hLines',
 define(`hLine', `(L h (L x (concatenate, (rep, (minus, h, x), space), (rep, x, asterix))))')dnl
 define(`rep', `(L n (replicate, n))')dnl
 define(`hInts', `(L xs (map, (count, xs), zeroToNine))')dnl
-dnl count is self referential. Use a combinator to pass the function as its own first argument.
+dnl the Y combinator (used to create recursive functions)
+define(`Y',`(L f ((L x (f, (x, x))), (L x (f, (x, x)))))')dnl
+dnl count is self referential. Use the Y combinator to pass the function (recursively applied to itself) as its own first argument.
 define(`_count',
 `
 (
@@ -44,16 +46,16 @@ define(`_count',
       L n (
         bool,
           zero,
-          (plus, (bool, zero, one, (eq, (head, xs), n)), (self, self, (tail, xs), n)),
+          (plus, (bool, zero, one, (eq, (head, xs), n)), (self, (tail, xs), n)),
           (isEmptyList, xs)
       )
     )
   )
 )
 ')dnl
-define(`count',`(L f (f, f), _count)')dnl
+define(`count',`(Y, _count)')dnl
 dnl length function is not actually used, other than as a simple test of recursive functions.
-dnl length is self referential. Use a combinator to pass the function as its own first argument.
+dnl length is self referential. Use the Y combinator to pass the function (recursively applied to itself) as its own first argument.
 define(`_length',
 `
 (
@@ -61,14 +63,14 @@ define(`_length',
     L xs (
       bool,
         zero,
-        (plus, one, (self, self, (tail, xs))),
+        (plus, one, (self, (tail, xs))),
         (isEmptyList, xs)
     )
   )
 )
 ')dnl
-define(`length',`(L f (f, f), _length)')dnl
-dnl foldr is self referential. Use a combinator to pass the function as its own first argument.
+define(`length',`(Y, _length)')dnl
+dnl foldr is self referential. Use the Y combinator to pass the function (recursively applied to itself) as its own first argument.
 define(`_foldr',
 `
 (
@@ -78,7 +80,7 @@ define(`_foldr',
         L xs (
           bool,
             z,
-            (f, (head, xs), ((self, self), f, z, (tail, xs))),
+            (f, (head, xs), (self, f, z, (tail, xs))),
             (isEmptyList, xs)
         )
       )
@@ -86,10 +88,10 @@ define(`_foldr',
   )
 )
 ')dnl
-define(`foldr',`(L f (f, f), _foldr)')dnl
+define(`foldr',`(Y, _foldr)')dnl
 dnl if x-y == 0, then numbers are equal. Uses 0 to represent False
 define(`eq',`(L x (L y (bool, one, zero, (minus, x, y))))')dnl
-dnl replicate is self referential. Use a combinator to pass the function as its own first argument.
+dnl replicate is self referential. Use the Y combinator to pass the function (recursively applied to itself) as its own first argument.
 define(`_replicate',
 `
 (
@@ -97,7 +99,7 @@ define(`_replicate',
     L n (
       L x (
         bool,
-          (cons, x, (self, self, (minus, n, one), x)),
+          (cons, x, (self, (minus, n, one), x)),
           emptyList,
           (eq, n, zero)
       )
@@ -105,7 +107,7 @@ define(`_replicate',
   )
 )
 ')dnl
-define(`replicate',`(L f (f, f), _replicate)')dnl
+define(`replicate',`(Y, _replicate)')dnl
 dnl using a lambda for double rather than a direct substitution prevents length getting out of hand
 define(`double',`(L x (plus, x, x))')dnl
 define(`_2',`(plus, one, one)')dnl

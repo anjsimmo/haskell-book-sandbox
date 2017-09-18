@@ -48,3 +48,7 @@ fibs5 = 0 : 1 : restSeq (foldr f base fibs5) where
   f :: Integer -> State -> State
   f x acc = State {val = x, restSeq = x + val acc : restSeq acc}
 
+-- zipWith implementation over two lists
+fibs6 :: [Integer]
+fibs6 = 0 : 1 : zipWith (+) (tail fibs6) (fibs6)
+

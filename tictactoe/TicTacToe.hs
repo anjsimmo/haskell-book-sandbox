@@ -60,9 +60,9 @@ prettyCell' :: Board -> Pos -> String
 prettyCell' b p = prettyCell $ M.findWithDefault Empty p (tokens b)
 
 prettyCell :: Token -> String
-prettyCell (T AI)    = "X"
-prettyCell (T Human) = "O"
-prettyCell Empty     = " "
+prettyCell (T AI)    = " ✕"
+prettyCell (T Human) = " ○"
+prettyCell Empty     = " □"
 
 safeMaximumNum     = maximum . ([0] ++)
 safeMaximumEndGame = maximum . ([L] ++)

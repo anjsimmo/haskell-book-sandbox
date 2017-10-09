@@ -23,6 +23,8 @@ instance Show Token where
 
 type Pos = (Size, Size)
 type Size = Int
+type Depth = Int
+type Intelligence = Depth -- AI strength is tree depth to search
 data BoardKnown = BoardKnown Board EndGame deriving (Show)
 data EndGame = L | D | W deriving (Eq, Show, Ord)  -- Order as appears in data type. Ordered by utility to AI.
 
@@ -41,9 +43,12 @@ genGameTree b = Tree b (map genGameTree (validBoards b))
 data StateVal a v = StateVal a v
 getState :: StateVal a v -> a
 getState (StateVal s _) = s
-
 getVal :: StateVal a v -> v
 getVal (StateVal _ v) = v
+
+trimTree :: Depth -> Tree a -> Tree a
+trimTree 0 t = Tree (getRoot t) []
+trimTree n t = Tree (getRoot t) (map (trimTree (n-1)) (getChildren t))
 
 evalGameTree :: GameTree -> Tree (StateVal Board EndGame)
 evalGameTree g = case v of
@@ -64,13 +69,13 @@ evalGameTree g = case v of
 reverseSortOn :: Ord b => (a -> b) -> [a] -> [a]
 reverseSortOn f xs = sortBy (\a b -> compare (f b) (f a)) xs
 
-pickBest :: Board -> Board
-pickBest b = fromMaybe skip best
+pickBest :: Intelligence -> Board -> Board
+pickBest i b = fromMaybe skip best
   where
     -- if can't go, do nothing other than toggling the turn
     skip = b { turn = toggleTurn (turn b) }
     best = case (judge b) of
-      Nothing   -> pickBest' ((map getRoot) . getChildren . evalGameTree . genGameTree $ b)
+      Nothing   -> pickBest' ((map getRoot) . getChildren . evalGameTree . (trimTree i) . genGameTree $ b)
       otherwise -> Nothing -- someone has already won
 
 pickBest' :: [StateVal Board EndGame] -> Maybe Board
@@ -91,9 +96,12 @@ prettyCell (T AI)    = " ✕"
 prettyCell (T Human) = " ○"
 prettyCell Empty     = " □"
 
+-- Todo: debug!
 safeMaximumNum     = maximum . ([0] ++)
-safeMaximumEndGame = maximum . ([L] ++)
-safeMinimumEndGame = minimum . ([W] ++)
+safeMaximumEndGame [] = D
+safeMaximumEndGame xs = maximum $ xs
+safeMinimumEndGame [] = D
+safeMinimumEndGame xs = minimum $ xs
 
 place :: Pos -> Board -> Board
 place p b = b { turn = toggleTurn (turn b), tokens = M.insert p (T $ turn b) (tokens b) }
@@ -104,10 +112,10 @@ safePlace p b = bool
   (Just $ place p b)
   (isFree b p)
 
-placeAndRespond :: Pos -> Board -> Maybe Board
-placeAndRespond p b = case (safePlace p b) of
+placeAndRespond :: Intelligence -> Pos -> Board -> Maybe Board
+placeAndRespond i p b = case (safePlace p b) of
   Nothing -> Nothing
-  Just b -> Just $ pickBest b
+  Just b -> Just $ (pickBest i b)
 
 validMoves :: Board -> [Pos]
 validMoves = validMoves'
@@ -175,4 +183,5 @@ empty :: Size -> Size -> Size -> Board
 empty nR nC connect = Board { rows = nR, cols = nC, connect = connect, turn = Human, tokens = M.fromList [] }
 
 main :: IO ()
-main = gameLoop show show judge placeAndRespond (empty 3 3 3)
+-- main = gameLoop show show judge (placeAndRespond 3) (empty 4 4 3)
+main = gameLoop show show judge (placeAndRespond 3) (empty 3 3 3)

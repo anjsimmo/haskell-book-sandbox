@@ -26,6 +26,40 @@ type Size = Int
 data BoardKnown = BoardKnown Board EndGame deriving (Show)
 data EndGame = L | D | W deriving (Eq, Show, Ord)  -- Order as appears in data type. Ordered by utility to AI.
 
+data Tree a = Tree a [Tree a] deriving (Show)
+getRoot :: Tree a -> a
+getRoot (Tree r _) = r
+getChildren :: Tree a -> [Tree a]
+getChildren (Tree _ cs) = cs
+
+type GameTree = Tree Board
+
+-- lazily generate game tree
+genGameTree :: Board -> GameTree
+genGameTree b = Tree b (map genGameTree (validBoards b))
+
+data StateVal a v = StateVal a v
+getState :: StateVal a v -> a
+getState (StateVal s _) = s
+
+getVal :: StateVal a v -> v
+getVal (StateVal _ v) = v
+
+evalGameTree :: GameTree -> Tree (StateVal Board EndGame)
+evalGameTree g = case v of
+  Just v'  -> Tree (StateVal b v') []
+  Nothing  -> case (turn b) of
+                AI     -> Tree (StateVal b (safeMaximumEndGame $ map (getVal . getRoot) children')) children'
+                Human  -> Tree (StateVal b (safeMinimumEndGame $ map (getVal . getRoot) children')) children' -- Human win is AI loss (0 sum game)
+  where
+    b :: Board
+    children :: [GameTree]
+    Tree b children = g
+    v :: Maybe EndGame
+    v = judge b
+    children' :: [Tree (StateVal Board EndGame)]
+    children' = map evalGameTree children
+
 -- convenience function
 reverseSortOn :: Ord b => (a -> b) -> [a] -> [a]
 reverseSortOn f xs = sortBy (\a b -> compare (f b) (f a)) xs
@@ -34,21 +68,14 @@ pickBest :: Board -> Board
 pickBest b = fromMaybe skip best
   where
     -- if can't go, do nothing other than toggling the turn
-    skip = Board { rows = rows b, cols = cols b, connect = connect b, turn = toggleTurn (turn b), tokens = tokens b }
+    skip = b { turn = toggleTurn (turn b) }
     best = case (judge b) of
-      Nothing   -> pickBest' (validBoards b)
+      Nothing   -> pickBest' ((map getRoot) . getChildren . evalGameTree . genGameTree $ b)
       otherwise -> Nothing -- someone has already won
 
-pickBest' :: [Board] -> Maybe Board
-pickBest' bs = listToMaybe opts -- pick the best (if any)
-  where opts = reverseSortOn eval bs -- first element is better
-
-eval :: Board -> EndGame
-eval b = case (judge b) of
-  Just x   -> x
-  Nothing  -> case (turn b) of
-                AI     -> safeMaximumEndGame $ map eval (validBoards b)
-                Human  -> safeMinimumEndGame $ map eval (validBoards b) -- Human win is AI loss (0 sum game)
+pickBest' :: [StateVal Board EndGame] -> Maybe Board
+pickBest' bs = listToMaybe . (map getState) $ opts -- pick the best (if any)
+  where opts = reverseSortOn getVal bs -- first element is better
 
 prettyBoard :: Board -> String
 prettyBoard b = concat [prettyRow b r | r <- [0..(rows b)-1]]
@@ -69,7 +96,7 @@ safeMaximumEndGame = maximum . ([L] ++)
 safeMinimumEndGame = minimum . ([W] ++)
 
 place :: Pos -> Board -> Board
-place p b = Board { rows = rows b, cols = cols b, connect = connect b, turn = toggleTurn (turn b), tokens = M.insert p (T $ turn b) (tokens b) }
+place p b = b { turn = toggleTurn (turn b), tokens = M.insert p (T $ turn b) (tokens b) }
 
 safePlace :: Pos -> Board -> Maybe Board
 safePlace p b = bool

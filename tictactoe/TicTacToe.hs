@@ -27,6 +27,10 @@ type Depth = Int
 type Intelligence = Depth -- AI strength is tree depth to search
 data BoardKnown = BoardKnown Board EndGame deriving (Show)
 data EndGame = L | D | W deriving (Eq, Show, Ord)  -- Order as appears in data type. Ordered by utility to AI.
+endGameUtil :: EndGame -> Float
+endGameUtil L = 0.0
+endGameUtil D = 0.5
+endGameUtil W = 1.0
 
 data Tree a = Tree a [Tree a] deriving (Show)
 getRoot :: Tree a -> a
@@ -50,20 +54,44 @@ trimTree :: Depth -> Tree a -> Tree a
 trimTree 0 t = Tree (getRoot t) []
 trimTree n t = Tree (getRoot t) (map (trimTree (n-1)) (getChildren t))
 
-evalGameTree :: GameTree -> Tree (StateVal Board EndGame)
+data GameUtil = GameUtil
+  { endGame :: EndGame
+  , depth   :: Depth    -- moves until endgame
+  , avg     :: Float    -- avg util of children (in case human is not smart enough to see this deep)
+  } deriving (Eq, Show, Ord)
+gameUtil :: EndGame -> GameUtil
+gameUtil e = GameUtil { endGame = e, depth = 0 , avg = 0.0 }
+
+type BoardVal = StateVal Board GameUtil
+
+evalGameTree :: GameTree -> Tree BoardVal
 evalGameTree g = case v of
-  Just v'  -> Tree (StateVal b v') []
+  Just v'  -> Tree (StateVal b (gameUtil v')) []
   Nothing  -> case (turn b) of
-                AI     -> Tree (StateVal b (safeMaximumEndGame $ map (getVal . getRoot) children')) children'
-                Human  -> Tree (StateVal b (safeMinimumEndGame $ map (getVal . getRoot) children')) children' -- Human win is AI loss (0 sum game)
+                AI     -> Tree (StateVal b maxEndGame { depth = depth maxEndGame + 1, avg = avgEndGame }) children'
+                Human  -> Tree (StateVal b minEndGame { depth = depth minEndGame + 1, avg = avgEndGame }) children' -- Human win is AI loss (0 sum game)
   where
     b :: Board
     children :: [GameTree]
     Tree b children = g
     v :: Maybe EndGame
     v = judge b
-    children' :: [Tree (StateVal Board EndGame)]
+    children' :: [Tree (StateVal Board GameUtil)]
     children' = map evalGameTree children
+    maxEndGame :: GameUtil
+    maxEndGame = safeMaximumEndGame $ map (getVal . getRoot) children'
+    minEndGame :: GameUtil
+    minEndGame = safeMinimumEndGame $ map (getVal . getRoot) children'
+    avgEndGame :: Float
+    avgEndGame = safeAvgEndGame $ map (getVal . getRoot) children'
+
+safeMaximumNum     = maximum . ([0] ++)
+safeMaximumEndGame [] = gameUtil D -- Treat invalid boards / trimmed nodes as draw
+safeMaximumEndGame xs = maximum $ xs
+safeMinimumEndGame [] = gameUtil D
+safeMinimumEndGame xs = minimum $ xs
+safeAvgEndGame [] = 0.0
+safeAvgEndGame xs = sum (map (endGameUtil . endGame) xs) / genericLength xs
 
 -- convenience function
 reverseSortOn :: Ord b => (a -> b) -> [a] -> [a]
@@ -78,7 +106,7 @@ pickBest i b = fromMaybe skip best
       Nothing   -> pickBest' ((map getRoot) . getChildren . evalGameTree . (trimTree i) . genGameTree $ b)
       otherwise -> Nothing -- someone has already won
 
-pickBest' :: [StateVal Board EndGame] -> Maybe Board
+pickBest' :: [StateVal Board GameUtil] -> Maybe Board
 pickBest' bs = listToMaybe . (map getState) $ opts -- pick the best (if any)
   where opts = reverseSortOn getVal bs -- first element is better
 
@@ -95,13 +123,6 @@ prettyCell :: Token -> String
 prettyCell (T AI)    = " ✕"
 prettyCell (T Human) = " ○"
 prettyCell Empty     = " □"
-
--- Todo: debug!
-safeMaximumNum     = maximum . ([0] ++)
-safeMaximumEndGame [] = D
-safeMaximumEndGame xs = maximum $ xs
-safeMinimumEndGame [] = D
-safeMinimumEndGame xs = minimum $ xs
 
 place :: Pos -> Board -> Board
 place p b = b { turn = toggleTurn (turn b), tokens = M.insert p (T $ turn b) (tokens b) }
@@ -183,5 +204,5 @@ empty :: Size -> Size -> Size -> Board
 empty nR nC connect = Board { rows = nR, cols = nC, connect = connect, turn = Human, tokens = M.fromList [] }
 
 main :: IO ()
--- main = gameLoop show show judge (placeAndRespond 3) (empty 4 4 3)
-main = gameLoop show show judge (placeAndRespond 3) (empty 3 3 3)
+main = gameLoop show show judge (placeAndRespond 3) (empty 4 4 3)
+--main = gameLoop show show judge (placeAndRespond 3) (empty 3 3 3)

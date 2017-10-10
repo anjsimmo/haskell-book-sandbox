@@ -5,6 +5,8 @@ import qualified Data.Map as M
 import Data.List (genericLength, sortBy)
 import Data.Bool
 import Data.Maybe
+import Numeric.Natural
+import Data.Ord
 
 data Board = Board
   { rows :: Size
@@ -54,13 +56,28 @@ trimTree :: Depth -> Tree a -> Tree a
 trimTree 0 t = Tree (getRoot t) []
 trimTree n t = Tree (getRoot t) (map (trimTree (n-1)) (getChildren t))
 
+-- Suggested by Rhys as way to correctly sort games by utility
+data Score = LoseIn Natural Float | Draw Float | WinIn (Down Natural) Float deriving (Show, Eq, Ord)
+
 data GameUtil = GameUtil
   { endGame :: EndGame
   , depth   :: Depth    -- moves until endgame
   , avg     :: Float    -- avg util of children (in case human is not smart enough to see this deep)
-  } deriving (Eq, Show, Ord)
+  } deriving (Eq, Show)
+instance Ord GameUtil where
+  compare a b = compare (toScore a) (toScore b)
+
 gameUtil :: EndGame -> GameUtil
 gameUtil e = GameUtil { endGame = e, depth = 0 , avg = 0.0 }
+
+toScore :: GameUtil -> Score
+toScore g = case endGame g of
+  L -> LoseIn (safeToNatural $ depth g) (avg g)
+  D -> Draw (avg g)
+  W -> WinIn (Down $ safeToNatural $ depth g) (avg g)
+
+safeToNatural :: Depth -> Natural
+safeToNatural x = fromIntegral (min 0 x) :: Natural
 
 type BoardVal = StateVal Board GameUtil
 

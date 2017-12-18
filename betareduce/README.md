@@ -27,7 +27,7 @@ divergence detected
 
 ## How it's implemented:
 
-Python string manipulations (TODO: re-implement in Haskell)
+Python string manipulations (TODO: [re-implement in Haskell](../betareduce2))
 
 ## Limitations:
 

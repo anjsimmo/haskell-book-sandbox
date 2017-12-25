@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wall #-}
 {-# LANGUAGE TupleSections #-}
 
 -- Copied from Rhys https://gitlab.com/rimmington/tictactoe/blob/master/IO.hs

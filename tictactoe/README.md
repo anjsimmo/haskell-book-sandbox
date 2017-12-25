@@ -3,7 +3,7 @@
 An AI to play Tic-Tac-Toe. The AI brute-force searches the entire game tree, so give it a minute to respond.
 
 ```
-stack runghc TicTacToe.hs
+stack runghc Main.hs
  □ □ □
  □ □ □
  □ □ □

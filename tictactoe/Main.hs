@@ -10,6 +10,7 @@ import TicTacToe
 import Connect4
 import Framework
 import Data.Maybe
+import Data.Bool
 
 -- level 0 => consider best move for AI,
 -- level 1 => consider Human reaction to AI move,
@@ -34,8 +35,9 @@ aiC4 = bruteforce estimateC4Util level3
 -- Wraps ai (ensures that core ai can't cheet)
 aiWrapper :: GameBoard b => Ai b b -> b -> b
 aiWrapper fa b = fromMaybe d b'
-  where b' = fa (validMoves b) id
+  where b' = fa ms id
         d  = skipTurn b
+        ms = bool [] (validMoves b) (isNothing $ judge b)
 
 placeAndRespond :: GameBoard b => (Pos -> b -> Maybe b) -> Ai b b -> Pos -> b -> Maybe b
 placeAndRespond fsp fa p b = case (fsp p b) of

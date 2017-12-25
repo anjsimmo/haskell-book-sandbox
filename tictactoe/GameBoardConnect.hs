@@ -48,7 +48,7 @@ prettyCell' b p = prettyCell $ M.findWithDefault Empty p (tokens b)
 prettyCell :: Token -> String
 prettyCell (T AI)    = " ✕"
 prettyCell (T Human) = " ○"
-prettyCell Empty     = " □"
+prettyCell Empty     = " ·"
 
 place :: Pos -> ConnBoard -> ConnBoard
 place p b = b { connTurn = toggleTurn (connTurn b), tokens = M.insert p (T $ connTurn b) (tokens b) }

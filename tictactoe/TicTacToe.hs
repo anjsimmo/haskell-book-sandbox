@@ -22,5 +22,5 @@ emptyTTT :: TTTBoard
 emptyTTT = TTTBoard $ empty 3 3 3
 
 -- TODO: Add this to game board class?
-safePlaceSimple :: Pos -> TTTBoard -> Maybe TTTBoard
-safePlaceSimple p b = TTTBoard <$> safePlace isFree p (unwrapTTT b)
+safePlaceSimpleTTT :: Pos -> TTTBoard -> Maybe TTTBoard
+safePlaceSimpleTTT p b = TTTBoard <$> safePlace isFree p (unwrapTTT b)

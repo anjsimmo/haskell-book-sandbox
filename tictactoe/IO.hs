@@ -1,18 +1,17 @@
 {-# OPTIONS_GHC -Wall #-}
 {-# LANGUAGE TupleSections #-}
 
--- Copied from Rhys https://gitlab.com/rimmington/tictactoe/blob/master/IO.hs
+-- Adapted from Rhys https://gitlab.com/rimmington/tictactoe/blob/master/IO.hs
 module IO (gameLoop) where
 
 import System.IO (hFlush, stdout)
-import Text.Read (readMaybe)
 
-inputLoop :: (a -> String) -> (a -> Maybe b) -> ((Int, Int) -> a -> Maybe a) -> a -> IO (a, b)
+inputLoop :: (a -> String) -> (a -> Maybe b) -> (String -> a -> Maybe a) -> a -> IO (a, b)
 inputLoop shw won insert a0 = iterateUntilJust won' turn a0
   where
     won' a = (a,) <$> won a
-    turn a = putStrLn (shw a) *> untilJust (tryInsert a =<< untilJust prompt)
-    prompt = putStr "Enter a move like (0,0): " *> hFlush stdout *> (readMaybe <$> getLine)
+    turn a = putStrLn (shw a) *> untilJust (tryInsert a =<< prompt)
+    prompt = putStr "Enter a move: " *> hFlush stdout *> getLine
     tryInsert a coords
       | Just a' <- insert coords a = pure $ Just a'
       | otherwise                  = Nothing <$ putStrLn "That is not a valid move"
@@ -27,7 +26,7 @@ inputLoop shw won insert a0 = iterateUntilJust won' turn a0
 gameLoop :: (b -> String)                -- ^ How to show the board
          -> (r -> String)                -- ^ How to show the result
          -> (b -> Maybe r)               -- ^ Is there a game result?
-         -> ((Int, Int) -> b -> Maybe b) -- ^ Try to add a cross at coordinates
+         -> (String -> b -> Maybe b)     -- ^ Try to parse user input String and make move
          -> b                            -- ^ Initial board
          -> IO ()
 gameLoop sb sr won add b0 = declare =<< inputLoop sb won add b0

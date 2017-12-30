@@ -14,7 +14,11 @@ toggleTurn :: Turn -> Turn
 toggleTurn AI = Human
 toggleTurn Human = AI
 
-data EndGame = L | D | W deriving (Eq, Show, Ord) -- Ordered by utility to AI.
+data EndGame = L | D | W deriving (Eq, Ord) -- Ordered by utility to AI.
+instance Show EndGame where
+  show L = "Human Wins"
+  show D = "Draw"
+  show W = "AI Wins"
 
 type Pos = (Size, Size)
 type Size = Int

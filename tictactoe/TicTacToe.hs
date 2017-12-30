@@ -4,6 +4,7 @@ module TicTacToe where
 import Framework
 import GameBoardConnect
 import Data.Coerce (coerce) -- safe coercion (e.g for newtype in either direction)
+import Data.List (intersperse)
 
 newtype TTTBoard = TTTBoard ConnBoard
 unwrapTTT :: TTTBoard -> ConnBoard
@@ -16,7 +17,14 @@ instance GameBoard TTTBoard where
   skipTurn   = TTTBoard . skipTurn . unwrapTTT
 
 instance Show TTTBoard where
-  show = show . unwrapTTT
+  show b = showB ++ "\nMoves: " ++ showM
+    where
+      showB :: String
+      showB = show b'
+      showM :: String
+      showM = concat $ intersperse " " (map show (validMoves' isFree b'))
+      b' :: ConnBoard
+      b' = unwrapTTT b
 
 emptyTTT :: TTTBoard
 emptyTTT = TTTBoard $ empty 3 3 3

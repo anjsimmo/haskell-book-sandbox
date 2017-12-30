@@ -4,6 +4,7 @@ module Connect4 where
 import Framework
 import GameBoardConnect
 import Data.Coerce (coerce) -- safe coercion (e.g for newtype in either direction)
+import Data.List (intersperse)
 
 newtype C4Board = C4Board ConnBoard
 unwrapC4 :: C4Board -> ConnBoard
@@ -16,7 +17,14 @@ instance GameBoard C4Board where
   skipTurn   = C4Board . skipTurn . unwrapC4
 
 instance Show C4Board where
-  show = show . unwrapC4
+  show b = showB ++ "\nMoves: " ++ showM
+    where
+      showB :: String
+      showB = show b'
+      showM :: String
+      showM = concat $ intersperse " " (map show (validMoves' isFreeC4' b'))
+      b' :: ConnBoard
+      b' = unwrapC4 b
 
 emptyC4 :: C4Board
 emptyC4 = C4Board $ empty 6 7 4

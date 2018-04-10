@@ -1,6 +1,6 @@
 # Reversesum
 
-Given the total sum of x1 + x2 + ... + xn, find the combination of values x1, x2, ... xn that would result in the correct sum.
+Given the total sum of x1 + x2 + ... + xn, find the combination of values x1, x2, ..., xn that would result in the aforementioned sum.
 
 Example to calculate dice values that sum to 7:
 

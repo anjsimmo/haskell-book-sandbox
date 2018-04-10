@@ -19,10 +19,11 @@ Calculating...
 3 + 4
 ```
 
-Example to reverse 'anonymous' totals shown in an online research report:
+Example to reverse "anonymous" totals shown in an online research report:
 
 ```
-time ./solver
+$ stack ghc solver.hs
+$ time ./solver
 Sum: (e.g. 7)
 494
 Split: (e.g. 2)
@@ -38,7 +39,8 @@ sys   0m0.000s
 ```
 
 ```
-time ./solver
+$ stack ghc solver.hs
+$ time ./solver
 Sum: (e.g. 7)
 582
 Split: (e.g. 2)

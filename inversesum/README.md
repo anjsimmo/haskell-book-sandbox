@@ -19,6 +19,22 @@ Calculating...
 3 + 4
 ```
 
+Example to calculate values that sum to 8:
+
+```
+Sum: (e.g. 7)
+8
+Split: (e.g. 2)
+2
+Valid values: (e.g. 1 2 3 4 5 6)
+1 2 3 4 5 6
+Calculating...
+2 + 6
+3 + 5
+```
+(note that 4 + 4 = 8 was not included, as 4 only appeared once in the list of values)
+
+
 Example to reverse "anonymous" totals shown in an online research report:
 
 ```

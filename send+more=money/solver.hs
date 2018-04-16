@@ -2,6 +2,7 @@ import Prelude hiding ((!!))
 import Data.List.Safe ((!!))
 import Control.Monad
 import qualified Data.Set as S
+import Data.List ((\\))
 
 -- SEND + MORE == MONEY, S != 0, M != 0
 -- Unique chars: DEMNORSY
@@ -19,16 +20,16 @@ instance Show Soln where
   show s = "SEND = " ++ (show . send) s ++ ", MORE = " ++ (show . more) s ++ ", MONEY = " ++ (show . money) s
 
 allCombs :: [Soln]
-allCombs = Soln <$> d <*> e <*> m <*> n <*> o <*> r <*> s <*> y
-  where
-    d = [0..9]
-    e = [0..9]
-    m = [1..9] -- non-zero
-    n = [0..9]
-    o = [0..9]
-    r = [0..9]
-    s = [1..9] -- non-zero
-    y = [0..9]
+allCombs = do
+  d <- [0..9]
+  e <- [0..9] \\ [d]
+  m <- [1..9] \\ [d, e]  -- non-zero
+  n <- [0..9] \\ [d, e, m]
+  o <- [0..9] \\ [d, e, m, n]
+  r <- [0..9] \\ [d, e, m, n, o]
+  s <- [1..9] \\ [d, e, m, n, o, r] -- non-zero
+  y <- [0..9] \\ [d, e, m, n, o, r, s]
+  pure $ Soln d e m n o r s y
 
 goodCombs :: [Soln]
 goodCombs = mfilter isGood allCombs

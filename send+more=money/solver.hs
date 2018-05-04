@@ -3,9 +3,16 @@ import Data.List.Safe ((!!))
 import Control.Monad
 import qualified Data.Set as S
 import Data.List ((\\))
+import Control.Monad.Trans.State.Lazy
 
 -- SEND + MORE == MONEY, S != 0, M != 0
 -- Unique chars: DEMNORSY
+
+choice :: (Eq a) => [a] -> [(a, [a])]
+choice s = map (\a -> (a, s \\ [a])) s
+
+select :: (Eq a) => StateT [a] [] a
+select = StateT choice
 
 data Soln = Soln { grabD :: Integer
                  , grabE :: Integer
@@ -19,23 +26,18 @@ data Soln = Soln { grabD :: Integer
 instance Show Soln where
   show s = "SEND = " ++ (show . send) s ++ ", MORE = " ++ (show . more) s ++ ", MONEY = " ++ (show . money) s
 
-goodCombs :: [Soln]
-goodCombs = do
-  d <- [0..9]
-  e <- [0..9]
-  guard $ noDups [d, e]
-  m <- [1..9] -- non-zero
-  guard $ noDups [d, e, m]
-  n <- [0..9]
-  guard $ noDups [d, e, m, n]
-  o <- [0..9]
-  guard $ noDups [d, e, m, n, o]
-  r <- [0..9]
-  guard $ noDups [d, e, m, n, o, r]
-  s <- [1..9] -- non-zero
-  guard $ noDups [d, e, m, n, o, r, s]
-  y <- [0..9]
-  guard $ noDups [d, e, m, n, o, r, s, y]
+stateSolns :: StateT [Integer] [] Soln
+stateSolns = do
+  d <- select
+  e <- select
+  m <- select
+  guard $ m /= 0 -- m is non-zero
+  n <- select
+  o <- select
+  r <- select
+  s <- select
+  guard $ s /= 0 -- s is non-zero
+  y <- select
   let soln = Soln d e m n o r s y
   guard $ send soln + more soln == money soln
   pure soln
@@ -44,8 +46,10 @@ send  soln =                      grabS soln * 1000 + grabE soln * 100 + grabN s
 more  soln =                      grabM soln * 1000 + grabO soln * 100 + grabR soln * 10 + grabE soln
 money soln = grabM soln * 10000 + grabO soln * 1000 + grabN soln * 100 + grabE soln * 10 + grabY soln
 
-noDups :: (Ord a) => [a] -> Bool
-noDups ns = S.size (S.fromList ns) == length ns
+goodCombs :: [Soln]
+goodCombs = evalStateT stateSolns seed
+  where
+    seed = [0..9]
 
 main :: IO ()
 main = do

@@ -1,6 +1,6 @@
 # Tic-Tac-Toe
 
-An AI to play Tic-Tac-Toe. The AI brute-force searches the entire game tree, so give it a minute to respond.
+An AI to play Tic-Tac-Toe. Also plays Connect4 and Chess (work in progress).
 
 ```
 stack runghc Main.hs
